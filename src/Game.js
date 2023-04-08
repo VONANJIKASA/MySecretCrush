@@ -2,11 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { FB_APP_ID } from "./config";
+import firebase from "firebase/app";
+import "firebase/database";
 
 function Game() {
-  const [user, setUser] = useState(null);
-  const [crush, setCrush] = useState(null);
-  const [hasMutualCrush, setHasMutualCrush] = useState(false);
+  const [playerName, setPlayerName] = useState("");
+  const [playerCrush, setPlayerCrush] = useState("");
+  const [admirers, setAdmirers] = useState([]);
+  const [match, setMatch] = useState(null);
 
   useEffect(() => {
     window.fbAsyncInit = function () {
@@ -36,25 +39,86 @@ function Game() {
     })(document, "script", "facebook-jssdk");
   }, []);
 
-  function handleCrushSubmit(event) {
+  const handleChange = (event) => {
+    if (event.target.name === "playerName") {
+      setPlayerName(event.target.value);
+    } else if (event.target.name === "playerCrush") {
+      setPlayerCrush(event.target.value);
+    }
+  };
+
+  const handleSubmit = (event) => {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    const crushName = formData.get("crush");
-    // TODO: Implement logic to post to the user's crush's wall
-    setCrush(crushName);
-  }
+
+    const gameRef = firebase.database().ref("game");
+    const admirersRef = firebase.database().ref("admirers");
+
+    const player = {
+      name: playerName,
+      crush: playerCrush,
+      status: "waiting",
+    };
+
+    gameRef.set("waiting");
+    admirersRef.push(player);
+
+    admirersRef.on("value", (snapshot) => {
+      const admirers = snapshot.val();
+      const matchedAdmirer = Object.values(admirers).find(
+        (admirer) =>
+          admirer.crush === playerName && admirer.name === playerCrush
+      );
+
+      if (matchedAdmirer) {
+        setMatch(matchedAdmirer);
+        admirersRef.off();
+      } else {
+        setAdmirers(Object.values(admirers));
+      }
+    });
+  };
 
   return (
     <div>
-      {user && (
-        <form onSubmit={handleCrushSubmit}>
-          <label htmlFor="crush">Enter the name of your crush:</label>
-          <input type="text" id="crush" name="crush" />
+      {match ? (
+        <p>You have a match with {match.name}!</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <label>
+            Your name:
+            <input
+              type="text"
+              name="playerName"
+              value={playerName}
+              onChange={handleChange}
+            />
+          </label>
+          <br />
+          <label>
+            Your crush's name:
+            <input
+              type="text"
+              name="playerCrush"
+              value={playerCrush}
+              onChange={handleChange}
+            />
+          </label>
+          <br />
           <button type="submit">Submit</button>
         </form>
       )}
-
-      {hasMutualCrush && <p>Congratulations, you have a mutual crush!</p>}
+      {admirers.length > 0 && (
+        <div>
+          <p>Other admirers:</p>
+          <ul>
+            {admirers.map((admirer) => (
+              <li key={admirer.name + admirer.crush}>
+                {admirer.name} likes {admirer.crush}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
