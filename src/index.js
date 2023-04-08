@@ -5,6 +5,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import Game from "./Game";
 import { FB_APP_ID } from "./config";
+import firebase from "firebase/app";
+import "firebase/database";
 
 /*global FB*/
 
@@ -28,6 +30,17 @@ window.fbAsyncInit = function () {
     version: "v12.0",
   });
 };
+
+// Initialize Firebase
+firebase.initializeApp({
+  apiKey: "AIzaSyDPoONC6msL2pDyq8Jhz1b6pewRX2gP21c",
+  authDomain: "my-secret-crush2.firebaseapp.com",
+  projectId: "my-secret-crush2",
+  storageBucket: "my-secret-crush2.appspot.com",
+  messagingSenderId: "88820002505",
+  appId: "1:88820002505:web:72a05d89b6f71c1f2de718",
+  measurementId: "G-JBE6K8B5Q2",
+});
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
