@@ -68,6 +68,7 @@
         });
 
         FB.AppSecret = '47228efd65c3879f2f87040f7d9d0ec9';
+        FB.AppEvents.logPageView(); 
 
         FB.getLoginStatus(function(response) {
           if (response.status === 'connected') {
