@@ -8,6 +8,21 @@ import "firebase/firestore";
 import "firebase/auth";
 
 function Game() {
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPoONC6msL2pDyq8Jhz1b6pewRX2gP21c",
+    authDomain: "my-secret-crush2.firebaseapp.com",
+    projectId: "my-secret-crush2",
+    storageBucket: "my-secret-crush2.appspot.com",
+    messagingSenderId: "88820002505",
+    appId: "1:88820002505:web:72a05d89b6f71c1f2de718",
+    measurementId: "G-JBE6K8B5Q2",
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
   const [playerName, setPlayerName] = useState("");
   const [playerCrush, setPlayerCrush] = useState("");
   const [admirers, setAdmirers] = useState([]);
@@ -24,7 +39,8 @@ function Game() {
 
       FB.getLoginStatus(function (response) {
         if (response.status === "connected") {
-          setUser(response.authResponse.userID);
+          // check the below commented code if required
+          //setUser(response.authResponse.userID);
         }
       });
     };
@@ -52,8 +68,8 @@ function Game() {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const gameRef = firebase.database().ref("game");
-    const admirersRef = firebase.database().ref("admirers");
+    const db = firebase.firestore();
+    const admirersCollectionRef = db.collection("admirers");
 
     const player = {
       name: playerName,
@@ -61,24 +77,42 @@ function Game() {
       status: "waiting",
     };
 
-    gameRef.set("waiting");
-    admirersRef.push(player);
+    admirersCollectionRef
+      .add(player)
+      .then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        admirersCollectionRef.doc(docRef.id).onSnapshot((doc) => {
+          const matchedAdmirer = doc.data();
+          if (matchedAdmirer.status === "matched") {
+            setMatch(matchedAdmirer);
+          } else {
+            setAdmirers(
+              admirers
+                .filter(
+                  (admirer) =>
+                    admirer.name !== player.name &&
+                    admirer.crush !== player.crush
+                )
+                .concat([player])
+            );
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
+  };
+
+  useEffect(() => {
+    const admirersRef = firebase.database().ref("admirers");
 
     admirersRef.on("value", (snapshot) => {
       const admirers = snapshot.val();
-      const matchedAdmirer = Object.values(admirers).find(
-        (admirer) =>
-          admirer.crush === playerName && admirer.name === playerCrush
-      );
-
-      if (matchedAdmirer) {
-        setMatch(matchedAdmirer);
-        admirersRef.off();
-      } else {
-        setAdmirers(Object.values(admirers));
-      }
+      setAdmirers(Object.values(admirers));
     });
-  };
+
+    return () => admirersRef.off();
+  }, []);
 
   return (
     <div>
