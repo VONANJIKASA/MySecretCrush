@@ -22,7 +22,28 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>My Secret Crush</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-analytics.js"></script>
+    <script>
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyDPoONC6msL2pDyq8Jhz1b6pewRX2gP21c",
+        authDomain: "my-secret-crush2.firebaseapp.com",
+        projectId: "my-secret-crush2",
+        storageBucket: "my-secret-crush2.appspot.com",
+        messagingSenderId: "88820002505",
+        appId: "1:88820002505:web:72a05d89b6f71c1f2de718",
+        measurementId: "G-JBE6K8B5Q2"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
+    <script defer src="Game.js"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

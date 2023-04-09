@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { FB_APP_ID } from "./config";
 import firebase from "firebase/app";
 import "firebase/database";
+import "firebase/firestore";
+import "firebase/auth";
 
 function Game() {
   const [playerName, setPlayerName] = useState("");
